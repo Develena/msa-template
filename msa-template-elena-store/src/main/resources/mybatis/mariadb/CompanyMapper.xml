@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ UserMapper.xml
+  ~
+  ~
+  ~ 21. 3. 15. 오전 11:21
+  ~
+  ~
+  ~ Copyright (c) 2021 NURIFLEX, Inc.
+  ~ All rights reserved.
+  ~
+  ~
+  ~ This software is the confidential and proprietary information of NURIFLEX, Inc. ("Confidential Information").
+  ~ You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement you entered into with NURIFLEX, Inc.
+  ~
+  ~
+  ~ For more information on this product, please see
+  ~ http://www.nuritelecom.co.kr
+  ~
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="companyMapper">
+
+  <sql id="base_where_list">
+    <where>
+      <if test="compSeq != null">
+        AND COMP_SEQ = #{compSeq}
+      </if>
+      <if test="compNm != null">
+        AND COMP_NM = #{compNm}
+      </if>
+      <if test="bizRegNo != null">
+        AND BIZ_REG_NO = HEX(AES_ENCRYPT(#{bizRegNo},'${encrypt-key}'))
+      </if>
+      <if test="corpNo != null">
+        AND CORP_NO = HEX(AES_ENCRYPT(#{corpNo},'${encrypt-key}'))
+      </if>
+      <if test="manager != null">
+        AND MANAGER = HEX(AES_ENCRYPT(#{manager},'${encrypt-key}'))
+      </if>
+      <if test="managerTelephone != null">
+        AND MANAGER_TELEPHONE = HEX(AES_ENCRYPT(#{managerTelephone},'${encrypt-key}'))
+      </if>
+      <if test="industry != null">
+        AND INDUSTRY = #{industry}
+      </if>
+      <if test="compAddr != null">
+        AND COMP_ADDR = #{compAddr}
+      </if>
+      <if test="compTelephone != null">
+        AND COMP_TELEPHONE = #{compTelephone}
+      </if>
+    </where>
+  </sql>
+
+
+  <sql id="search_where_list">
+    <where>
+      <if test="startCreateDt != null">
+        AND CREATED_DT <![CDATA[>=]]> #{startCreateDt}
+      </if>
+      <if test="endCreateDt != null">
+        AND CREATED_DT <![CDATA[<=]]> #{endCreateDt}
+      </if>
+      <if test="searchquery != null ">
+        AND (COMP_NM like concat(#{searchquery},'%')
+        OR BIZ_REG_NO = HEX(AES_ENCRYPT(#{searchquery},'${encrypt-key}'))
+        OR CORP_NO = HEX(AES_ENCRYPT(#{searchquery},'${encrypt-key}'))
+        )
+      </if>
+    </where>
+  </sql>
+
+  <insert id="createCompany" parameterType="hashMap">
+    /* companyMapper.createCompany */
+    INSERT INTO NURI_COMPANY_INFO ( comp_nm
+    , ceo_nm
+    , biz_reg_no
+    , corp_no
+    , manager
+    , manager_telephone
+    , industry
+    , bizcnd
+    , comp_zipcode
+    , comp_addr
+    , comp_addr2
+    , comp_telephone
+    , comp_email
+    , comp_fax
+    , comp_url
+    , service_status
+    , parent_comp_seq
+    , creator_id
+    , created_dt
+    ) value (
+    #{compNm}
+    ,
+    <choose>
+      <when test="ceoNm == null">null</when>
+      <otherwise>HEX(AES_ENCRYPT(#{ceoNm},'${encrypt-key}'))</otherwise>
+    </choose>
+    ,
+    <choose>
+      <when test="bizRegNo == null">null</when>
+      <otherwise>HEX(AES_ENCRYPT(#{bizRegNo},'${encrypt-key}'))</otherwise>
+    </choose>
+    ,
+    <choose>
+      <when test="corpNo == null">null</when>
+      <otherwise>HEX(AES_ENCRYPT(#{corpNo},'${encrypt-key}'))</otherwise>
+    </choose>
+    ,
+    <choose>
+      <when test="manager == null">null</when>
+      <otherwise>HEX(AES_ENCRYPT(#{manager},'${encrypt-key}'))</otherwise>
+    </choose>
+    ,
+    <choose>
+      <when test="managerTelephone == null">null</when>
+      <otherwise>HEX(AES_ENCRYPT(#{managerTelephone},'${encrypt-key}'))</otherwise>
+    </choose>
+    , #{industry}
+    , #{bizcnd}
+    , #{compZipcode}
+    , #{compAddr}
+    , #{compAddr2}
+    , #{compTelephone}
+    , #{compEmail}
+    , #{compFax}
+    , #{compUrl}
+    , #{serviceStatus}
+    , #{parentCompId}
+    , #{creatorId}
+    , #{createdDt}
+    )
+  </insert>
+
+  <delete id="deleteCompany" parameterType="java.lang.Integer">
+    DELETE
+    FROM NURI_COMPANY_INFO
+    WHERE comp_seq = #{compSeq};
+  </delete>
+
+  <select id="selectCompanyByCompSeq" parameterType="java.lang.Integer" resultType="Company">
+    /* companyMapper.selectCompanyByCompSeq */
+    SELECT comp_seq
+         , comp_nm
+         , AES_DECRYPT(UNHEX(ceo_nm), '${encrypt-key}')            as ceo_nm
+         , AES_DECRYPT(UNHEX(biz_reg_no), '${encrypt-key}')        as biz_reg_no
+         , AES_DECRYPT(UNHEX(corp_no), '${encrypt-key}')           as corp_no
+         , AES_DECRYPT(UNHEX(manager), '${encrypt-key}')           as manager
+         , AES_DECRYPT(UNHEX(manager_telephone), '${encrypt-key}') as manager_telephone
+         , industry
+         , bizcnd
+         , comp_zipcode
+         , comp_addr
+         , comp_addr2
+         , comp_telephone
+         , comp_email
+         , comp_fax
+         , comp_url
+         , service_status
+         , parent_comp_seq
+         , creator_id
+         , created_dt
+         , updater_id
+         , updated_dt
+    FROM NURI_COMPANY_INFO
+    WHERE comp_seq = #{compSeq};
+  </select>
+
+  <select id="selectCompanyByCompNm" parameterType="java.lang.String" resultType="Company">
+    /* companyMapper.selectCompanyByCompNm */
+    SELECT comp_seq
+         , comp_nm
+         , AES_DECRYPT(UNHEX(ceo_nm), '${encrypt-key}')            as ceo_nm
+         , AES_DECRYPT(UNHEX(biz_reg_no), '${encrypt-key}')        as biz_reg_no
+         , AES_DECRYPT(UNHEX(corp_no), '${encrypt-key}')           as corp_no
+         , AES_DECRYPT(UNHEX(manager), '${encrypt-key}')           as manager
+         , AES_DECRYPT(UNHEX(manager_telephone), '${encrypt-key}') as manager_telephone
+         , industry
+         , bizcnd
+         , comp_zipcode
+         , comp_addr
+         , comp_addr2
+         , comp_telephone
+         , comp_email
+         , comp_fax
+         , comp_url
+         , service_status
+         , parent_comp_seq
+         , creator_id
+         , created_dt
+         , updater_id
+         , updated_dt
+    FROM NURI_COMPANY_INFO
+    WHERE comp_nm = #{compNm};
+  </select>
+
+  <update id="updateCompany" parameterType="hashMap">
+    /* userMapper.updateCompany */
+    UPDATE `NURI_COMPANY_INFO` ci
+    <set>
+      <if test="compNm != null">ci.comp_nm = #{compNm},</if>
+      <if test="bizRegNo != null">ci.biz_reg_no = HEX(AES_ENCRYPT(#{bizRegNo},'${encrypt-key}')),</if>
+      <if test="corpNo != null">ci.corp_no = HEX(AES_ENCRYPT(#{corpNo},'${encrypt-key}')),</if>
+      <if test="industry != null">ci.industry = #{industry},</if>
+      <if test="compAddr != null">ci.comp_addr = #{compAddr},</if>
+      <if test="compTelephone != null">ci.comp_telephone = #{compTelephone},</if>
+      <if test="manager != null">ci.manager = HEX(AES_ENCRYPT(#{manager},'${encrypt-key}')),</if>
+      <if test="managerTelephone != null">ci.manager_telephone = HEX(AES_ENCRYPT(#{managerTelephone},'${encrypt-key}')),</if>
+      <if test="updatedDt != null">ci.updated_dt = #{updatedDt},</if>
+    </set>
+    WHERE ci.comp_seq = #{compSeq};
+  </update>
+
+  <select id="selectCompanyByParam" parameterType="hashMap" resultType="Company">
+    /* companyMapper.selectCompanyByParam */
+    SELECT comp_seq
+    , comp_nm
+    , AES_DECRYPT(UNHEX(ceo_nm),'${encrypt-key}') as ceo_nm
+    , AES_DECRYPT(UNHEX(biz_reg_no),'${encrypt-key}') as biz_reg_no
+    , AES_DECRYPT(UNHEX(corp_no),'${encrypt-key}') as corp_no
+    , AES_DECRYPT(UNHEX(manager),'${encrypt-key}') as manager
+    , AES_DECRYPT(UNHEX(manager_telephone),'${encrypt-key}') as manager_telephone
+    , industry
+    , bizcnd
+    , comp_zipcode
+    , comp_addr
+    , comp_addr2
+    , comp_telephone
+    , comp_email
+    , comp_fax
+    , comp_url
+    , service_status
+    , parent_comp_seq
+    , creator_id
+    , created_dt
+    , updater_id
+    , updated_dt
+    FROM NURI_COMPANY_INFO
+    <include refid="base_where_list"/>
+    <include refid="commonMapper.order_by_list"/>
+    <include refid="commonMapper.page_limit"/>
+  </select>
+
+  <select id="selectCompanyGrid" parameterType="hashMap" resultType="CompanyReturnResult">
+    /* userMapper.selectCompanyGrid */
+    SELECT
+    comp_seq
+    , comp_nm
+    , AES_DECRYPT(UNHEX(corp_no),'${encrypt-key}') as corp_no
+    , AES_DECRYPT(UNHEX(biz_reg_no),'${encrypt-key}') as biz_reg_no
+    , AES_DECRYPT(UNHEX(manager),'${encrypt-key}') as manager
+    , AES_DECRYPT(UNHEX(manager_telephone),'${encrypt-key}') as manager_telephone
+    , industry
+    , comp_addr
+    , comp_telephone
+    , created_dt
+    FROM NURI_COMPANY_INFO
+    <include refid="search_where_list"/>
+    <include refid="commonMapper.order_by_list"/>
+    <include refid="commonMapper.page_limit"/>
+  </select>
+
+  <select id="countCompanyGridTotal" parameterType="hashMap" resultType="java.lang.Integer">
+    /* userMapper.countUserGridTotal */
+    SELECT
+    count(comp_seq) TOTAL_CNT
+    FROM NURI_COMPANY_INFO
+    <include refid="search_where_list"/>
+  </select>
+</mapper>

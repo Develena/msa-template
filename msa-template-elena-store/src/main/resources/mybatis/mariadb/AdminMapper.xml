@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ UserMapper.xml
+  ~
+  ~
+  ~ 21. 3. 15. 오전 11:21
+  ~
+  ~
+  ~ Copyright (c) 2021 NURIFLEX, Inc.
+  ~ All rights reserved.
+  ~
+  ~
+  ~ This software is the confidential and proprietary information of NURIFLEX, Inc. ("Confidential Information").
+  ~ You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement you entered into with NURIFLEX, Inc.
+  ~
+  ~
+  ~ For more information on this product, please see
+  ~ http://www.nuritelecom.co.kr
+  ~
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="adminMapper">
+
+  <sql id="base_where_list">
+    <where>
+      <if test="userSeq != null">
+        AND USER_SEQ = #{userSeq}
+      </if>
+      <if test="userId != null">
+        AND USER_ID = #{userId}
+      </if>
+      <if test="userNm != null">
+        AND USER_NM = #{userNm}
+      </if>
+      <if test="creatorId != null">
+        AND CREATOR_ID = #{creatorId}
+      </if>
+      <if test="searchfield != null and searchquery != null ">
+        AND ${searchfield} like concat(#{searchquery},'%')
+      </if>
+    </where>
+  </sql>
+
+  <select id="getUserPageList" parameterType="UserPageParam" resultType="UserReturnResult">
+    /* adminMapper.getUserList */
+    SELECT
+    USER_SEQ, USER_ID, USER_NM, TELEPHONE
+    , CELLPHONE, EMAIL, BIRTHDAY
+    , GENDER, ZIPCODE, ADDR, ADDR2
+    , SERVICE_STATUS, USER_TYPE, JOIN_TYPE, INACTIVE_DT
+    , CREATOR_ID, CREATED_DT, UPDATER_ID, UPDATED_DT
+    FROM NURI_USER_INFO
+
+    <include refid="base_where_list"/>
+
+    <include refid="commonMapper.order_by_list"/>
+
+    <include refid="commonMapper.page_limit"/>
+
+  </select>
+
+  <select id="getUserListCount" parameterType="map" resultType="int">
+    /* adminMapper.getUserListCount */
+    SELECT
+    COUNT(USER_SEQ)
+    FROM NURI_USER_INFO
+
+    <include refid="base_where_list"/>
+
+  </select>
+</mapper>

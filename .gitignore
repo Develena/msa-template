@@ -1,0 +1,6 @@
+/gnd-onm-user-boot/src/main/resources/generated-sources/
+/gnd-onm-user-boot/src/main/resources/static/
+
+# Project exclude paths
+/msa-template-elena-boot/target/
+/msa-template-elena-store/target/

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+  <property name="LOGS_ABSOLUTE_PATH" value="logs"/>
+
+  <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOGS_ABSOLUTE_PATH}/service.log</file>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}][%-5level][%logger{36}][%method:%line] - %msg%n
+      </pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOGS_ABSOLUTE_PATH}/userService.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>10MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+  </appender>
+
+  <appender name="file-sql" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOGS_ABSOLUTE_PATH}/serviceSql.log</file>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}][%-5level][%logger{36}][%method:%line] - %msg%n
+      </pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOGS_ABSOLUTE_PATH}/userServiceSql.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>10MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+  </appender>
+
+  <appender class="ch.qos.logback.core.ConsoleAppender" name="STDOUT">
+    <encoder>
+      <pattern>
+        [%d{yyyy-MM-dd HH:mm:ss.SSS}][%-5level][%logger{36}][%class.%method:%line] - %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <logger name="jdbc.connection" additivity="false">
+    <appender-ref ref="file-sql"/>
+    <level value="OFF"/>
+  </logger>
+  <logger name="jdbc.audit" additivity="false">
+    <appender-ref ref="file-sql"/>
+    <appender-ref ref="STDOUT"/>
+    <level value="OFF"/>
+  </logger>
+  <logger name="jdbc.resultset" additivity="false">
+    <appender-ref ref="file-sql"/>
+    <appender-ref ref="STDOUT"/>
+    <level value="OFF"/>
+  </logger>
+  <logger name="jdbc.resultsettable" additivity="false">
+    <appender-ref ref="file-sql"/>
+    <appender-ref ref="STDOUT"/>
+    <level value="INFO"/>
+  </logger>
+
+  <logger name="com.nuri.user" level="debug">
+  </logger>
+
+  <logger name="jdbc.sqlonly" additivity="false">
+    <appender-ref ref="file-sql"/>
+    <level value="INFO"/>
+  </logger>
+
+
+  <root level="INFO">
+    <appender-ref ref="file"></appender-ref>
+    <appender-ref ref="STDOUT"></appender-ref>
+  </root>
+
+</configuration>
+
+

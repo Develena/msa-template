@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ UserMapper.xml
+  ~
+  ~
+  ~ 21. 5. 11. 오후 4:44
+  ~
+  ~
+  ~ Copyright (c) 2021 NURIFLEX, Inc.
+  ~ All rights reserved.
+  ~
+  ~
+  ~ This software is the confidential and proprietary information of NURIFLEX, Inc. ("Confidential Information").
+  ~ You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement you entered into with NURIFLEX, Inc.
+  ~
+  ~
+  ~ For more information on this product, please see
+  ~ http://www.nuritelecom.co.kr
+  ~
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="userAuditLogMapper">
+
+  <sql id="base_where_list">
+    <where>
+      <if test="userSeq != null">
+        AND USER_SEQ = #{userSeq}
+      </if>
+      <if test="userId != null">
+        AND USER_ID = #{userId}
+      </if>
+      <if test="userNm != null">
+        AND USER_NM = #{userNm}
+      </if>
+      <if test="createId != null">
+        AND CREATE_ID = #{createId}
+      </if>
+      <if test="searchfield != null and searchquery != null ">
+        AND ${searchfield} like concat(#{searchquery},'%')
+      </if>
+    </where>
+  </sql>
+
+  <insert id="insertUserAuditLog" parameterType="RegisterAuditLogParam" >
+    INSERT IGNORE INTO `NURI_USER_AUDIT_LOG` (
+        USER_SEQ
+        , USER_ID
+        , USER_NM
+        , ACT
+        , UPDATE_ITEM
+        , BEFORE_VALUE
+        , AFTER_VALUE
+        , IP
+        , CREATOR_ID
+        , CREATED_DT
+    ) VALUES (
+        #{userSeq}
+        , #{userId}
+        , #{userNm}
+        , #{act}
+        , #{updateItem}
+        , #{beforeValue}
+        , #{afterValue}
+        , #{ip}
+        , #{creatorId}
+        , #{createdDt}
+    )
+  </insert>
+</mapper>

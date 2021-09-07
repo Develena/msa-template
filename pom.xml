@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- ******************  -->
+  <!-- global properties   -->
+  <!-- ******************  -->
+  <properties>
+    <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+    <openapi.generator.version>5.0.1</openapi.generator.version>
+
+    <project.main.version>1.0.0-SNAPSHOT</project.main.version>
+    <project.boot.version>1.0.0-SNAPSHOT</project.boot.version>
+    <project.domain.version>1.0.0-SNAPSHOT</project.domain.version>
+    <project.service.version>1.0.0-SNAPSHOT</project.service.version>
+    <project.store.version>1.0.0-SNAPSHOT</project.store.version>
+    <project.main.name>msa-template-elena</project.main.name>
+    <project.main.package>com.msa.template.elena</project.main.package>
+
+<!--    <nexus.ip>http://172.16.10.60:58081</nexus.ip>-->
+<!--    <nexus.id>wll27471297</nexus.id>-->
+  </properties>
+
+  <!-- ******************  -->
+  <!-- parent module setting -->
+  <!-- ******************  -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.2.6.RELEASE</version> <!-- lookup parent from repository -->
+  </parent>
+
+  <!-- ******************  -->
+  <!-- oneself module setting -->
+  <!-- ******************  -->
+  <groupId>com.elena.project.user</groupId>
+  <artifactId>msa-template-user</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <!-- ******************  -->
+  <!-- children module     -->
+  <!-- ******************  -->
+  <modules>
+    <module>${project.main.name}-boot</module>
+    <module>${project.main.name}-service</module>
+    <module>${project.main.name}-store</module>
+    <module>${project.main.name}-domain</module>
+  </modules>
+
+  <dependencies>
+    <!-- ******************  -->
+    <!-- spring-boot         -->
+    <!-- ******************  -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <version>${spring-boot.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- ******************  -->
+    <!-- swagger             -->
+    <!-- ******************  -->
+    <!-- 기본 -->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-ui</artifactId>
+      <version>1.5.5</version>
+    </dependency>
+    <!-- 빌드 시 yml 생성을 위해 사용 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <!-- 빌드 시 yml 생성을 위해 사용 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <!-- generator : 빌드 시 html 생성을 위해 사용 -->
+    <dependency>
+      <groupId>org.openapitools</groupId>
+      <artifactId>openapi-generator</artifactId>
+      <version>${openapi.generator.version}</version>
+    </dependency>
+
+    <!-- ******************  -->
+    <!-- logback            -->
+    <!-- ******************  -->
+    <dependency>
+      <groupId>org.bgee.log4jdbc-log4j2</groupId>
+      <artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
+      <version>1.16</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.30</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- ******************  -->
+    <!-- naver lucy          -->
+    <!-- ******************  -->
+    <dependency>
+      <groupId>com.navercorp.lucy</groupId>
+      <artifactId>lucy-xss-servlet</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>1.9</version>
+    </dependency>
+
+    <!-- ******************  -->
+    <!-- nuri.public.util    -->
+    <!-- ******************  -->
+<!--    <dependency>-->
+<!--      <groupId>com.nuri.utils</groupId>-->
+<!--      <artifactId>nuri-public-utils</artifactId>-->
+<!--      <version>1.1.0</version>-->
+<!--    </dependency>-->
+
+  </dependencies>
+
+
+  <!-- ******************  -->
+  <!-- Nexus               -->
+  <!-- ******************  -->
+<!--  <repositories>-->
+<!--    <repository>-->
+<!--      <id>maven-public</id>-->
+<!--      <name>maven-public</name>-->
+<!--      <url>${nexus.ip}/repository/maven-public/</url>-->
+<!--    </repository>-->
+<!--  </repositories>-->
+
+<!--  <distributionManagement>-->
+<!--    <repository>-->
+<!--      <id>maven-releases</id>-->
+<!--      <name>${nexus.id}</name>-->
+<!--      <url>${nexus.ip}/repository/maven-releases/</url>-->
+<!--    </repository>-->
+<!--    <snapshotRepository>-->
+<!--      <id>maven-snapshots</id>-->
+<!--      <name>${nexus.id}</name>-->
+<!--      <url>${nexus.ip}/repository/maven-snapshots/</url>-->
+<!--    </snapshotRepository>-->
+<!--  </distributionManagement>-->
+
+</project>

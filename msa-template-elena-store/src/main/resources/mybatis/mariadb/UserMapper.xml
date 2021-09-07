@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ UserMapper.xml
+  ~
+  ~
+  ~ 21. 3. 15. 오전 11:21
+  ~
+  ~
+  ~ Copyright (c) 2021 NURIFLEX, Inc.
+  ~ All rights reserved.
+  ~
+  ~
+  ~ This software is the confidential and proprietary information of NURIFLEX, Inc. ("Confidential Information").
+  ~ You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement you entered into with NURIFLEX, Inc.
+  ~
+  ~
+  ~ For more information on this product, please see
+  ~ http://www.nuritelecom.co.kr
+  ~
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="userMapper">
+
+  <sql id="base_where_list">
+    <where>
+      <if test="userSeq != null">
+        AND USER_SEQ = #{userSeq}
+      </if>
+      <if test="userId != null">
+        AND USER_ID = #{userId}
+      </if>
+      <if test="userNm != null">
+        AND USER_NM = #{userNm}
+      </if>
+      <if test="creatorId != null">
+        AND CREATOR_ID = #{creatorId}
+      </if>
+    </where>
+  </sql>
+
+  <sql id="search_where_list">
+    <where>
+      <if test="serviceStatus != null">
+        AND ui.SERVICE_STATUS = #{serviceStatus}
+      </if>
+      <if test="roleId != null">
+        AND nr.ROLE_ID = #{roleId}
+      </if>
+      <if test="startCreateDt != null">
+        AND ui.CREATED_DT <![CDATA[>=]]> date_format(concat(#{startCreateDt},' 00:00:00'), '${prop.dt.s}')
+      </if>
+      <if test="endCreateDt != null">
+        AND ui.CREATED_DT <![CDATA[<=]]> date_format(concat(#{endCreateDt},' 23:59:59'), '${prop.dt.s}')
+      </if>
+      <if test="compSeq != null ">
+        AND ci.COMP_SEQ = #{compSeq}
+      </if>
+      <if test="searchquery != null ">
+        AND (USER_ID like concat(#{searchquery},'%')
+        OR USER_NM like concat(#{searchquery},'%')
+        OR CELLPHONE like concat(#{searchquery},'%')
+        )
+      </if>
+    </where>
+  </sql>
+
+  <select id="selectUserById" parameterType="java.lang.String" resultType="UserResult">
+    /* userMapper.selectUserById */
+    SELECT user_seq
+         , user_id
+         , user_nm
+         , telephone
+         , cellphone
+         , passwd
+         , email
+         , birthday
+         , gender
+         , zipcode
+         , addr
+         , addr2
+         , service_status
+         , user_type
+         , join_type
+         , inactive_dt
+         , creator_id
+         , created_dt
+         , updater_id
+         , updated_dt
+    from `NURI_USER_INFO`
+    where user_id = #{userId};
+
+
+  </select>
+
+  <select id="selectUserInfoById" parameterType="java.lang.String" resultType="UserInfoResult">
+    /* userMapper.selectUserInfoById */
+    SELECT
+        ui.user_seq
+        , ui.user_id
+        , ui.user_nm
+        , ui.passwd
+        , ui.telephone
+        , ui.cellphone
+        , ui.email
+        , ui.birthday
+        , ui.gender
+        , ui.zipcode
+        , ui.addr
+        , ui.addr2
+        , ci.service_status as comp_status
+        , ui.service_status as service_status
+        , ui.user_type
+        , ui.join_type
+        , ui.inactive_dt
+        , ui.creator_id
+        , ui.created_dt
+        , ui.updater_id
+        , ui.updated_dt
+        , ci.comp_seq
+        , ci.comp_nm
+        , role.role_id
+        , role.role_nm
+    FROM `NURI_USER_INFO` ui
+    LEFT JOIN `NURI_USER_COMPANY` uc ON ui.user_seq = uc.user_seq
+    LEFT JOIN `NURI_COMPANY_INFO` ci ON uc.comp_seq = ci.comp_seq
+    LEFT JOIN `NURI_USER_ROLE` ur on ur.user_seq = ui.user_seq
+    LEFT JOIN `NURI_ROLE` role on ur.role_seq = role.role_seq
+    WHERE ui.user_id = #{userId};
+
+  </select>
+
+
+  <select id="selectUserTokenInfo" parameterType="java.lang.String" resultType="UserToken">
+    /* userMapper.selectUserTokenInfo */
+    SELECT ui.user_nm
+         , nr.role_id
+         , nr.role_nm
+         , nr.role
+         , ui.email
+         , uc.comp_seq
+         , uci.comp_nm
+    FROM `NURI_USER_INFO` ui
+           LEFT JOIN `NURI_USER_ROLE` ur ON ur.user_seq = ui.user_seq
+           LEFT JOIN `NURI_ROLE` nr ON nr.role_seq = ur.role_seq
+           LEFT JOIN `NURI_USER_COMPANY` uc ON ui.user_seq = uc.user_seq
+           LEFT JOIN `NURI_COMPANY_INFO` uci ON uci.comp_seq = uc.comp_seq
+    WHERE ui.user_id =  #{userId};
+
+  </select>
+
+  <select id="selectUserRoleInfo" parameterType="java.lang.String" resultType="UserRoleRes">
+    /* userMapper.selectUserRoleInfo */
+    SELECT ui.user_nm
+         , nr.role_id
+         , nr.role_nm
+    FROM `NURI_USER_INFO` ui
+           LEFT JOIN `NURI_USER_ROLE` ur ON ur.user_seq = ui.user_seq
+           LEFT JOIN `NURI_ROLE` nr ON nr.role_seq = ur.role_seq
+    WHERE ui.user_id = #{userId};
+
+  </select>
+
+  <select id="selectUserByUserName" parameterType="hashMap" resultType="UserResult">
+    /* userMapper.selectUserByUserName */
+    SELECT
+    user_seq
+    , user_id
+    , user_nm
+    , telephone
+    , cellphone
+    , passwd
+    , email
+    , birthday
+    , gender
+    , zipcode
+    , addr
+    , addr2
+    , service_status
+    , user_type
+    , join_type
+    , inactive_dt
+    , creator_id
+    , created_dt
+    , updater_id
+    , updated_dt
+    FROM
+    `NURI_USER_INFO`
+    <where>
+      user_nm = #{userName}
+      <if test="email != null">
+        AND email = #{email}
+      </if>
+      <if test="cellphone != null">
+        AND cellphone = #{cellphone}
+      </if>
+    </where>
+
+
+  </select>
+
+  <select id="selectUserPassword" parameterType="java.lang.String" resultType="java.lang.String">
+    /* userMapper.selectUserPassword */
+    SELECT ui.passwd
+    FROM `NURI_USER_INFO` ui
+    WHERE ui.user_id = #{userId};
+  </select>
+
+  <update id="updateUser" parameterType="hashMap">
+    /* userMapper.updateUser */
+    UPDATE `NURI_USER_INFO` ui
+    <set>
+      <if test="userNm != null">ui.user_nm = #{userNm},</if>
+      <if test="telephone != null">ui.telephone = #{telephone},</if>
+      <if test="cellphone != null">ui.cellphone = #{cellphone},</if>
+      <if test="password != null">ui.passwd = #{password},</if>
+      <if test="email != null">ui.email = #{email},</if>
+      <if test="birthday != null">ui.birthday = #{birthday},</if>
+      <if test="gender != null">ui.gender = #{gender},</if>
+      <if test="zipcode != null">ui.zipcode = #{zipcode},</if>
+      <if test="addr != null">ui.addr = #{addr},</if>
+      <if test="addr2 != null">ui.addr2 = #{addr2},</if>
+      <if test="serviceStatus != null">ui.service_status = #{serviceStatus},</if>
+      <if test="updaterId != null">ui.updater_id = #{updaterId},</if>
+      <if test="updatedDt != null">ui.updated_dt = #{updatedDt},</if>
+    </set>
+    WHERE ui.user_id = #{userId};
+  </update>
+
+
+  <insert id="createUser" parameterType="RegisterUserParam">
+    INSERT INTO `NURI_USER_INFO`( user_id
+                                , user_nm
+                                , telephone
+                                , cellphone
+                                , passwd
+                                , email
+                                , birthday
+                                , gender
+                                , zipcode
+                                , addr
+                                , addr2
+                                , service_status
+                                , user_type
+                                , join_type
+                                , inactive_dt
+                                , creator_id
+                                , created_dt) value ( #{userId}
+      , #{userNm}
+      , #{telephone}
+      , #{cellphone}
+      , #{passwd}
+      , #{email}
+      , #{birthday}
+      , #{gender}
+      , #{zipcode}
+      , #{addr}
+      , #{addr2}
+      , #{serviceStatus}
+      , #{userType}
+      , #{joinType}
+      , #{inactiveDt}
+      , #{creatorId}
+      , #{createdDt}
+      )
+  </insert>
+
+  <select id="selectUserGrid" parameterType="hashMap" resultType="UserGridReturnResult">
+    /* userMapper.selectUserGrid */
+    SELECT
+        ui.USER_SEQ
+        , ui.USER_ID
+        , ui.USER_NM
+        , ui.CELLPHONE
+        , ui.EMAIL
+        , ui.BIRTHDAY
+        , ui.CREATED_DT
+        , ui.SERVICE_STATUS as SERVICE_STATUS_CODE
+        , nr.ROLE_ID
+        , ci.COMP_NM
+    FROM NURI_USER_INFO ui
+    LEFT OUTER JOIN NURI_USER_ROLE ur ON ui.USER_SEQ = ur.USER_SEQ
+    LEFT OUTER JOIN NURI_ROLE nr ON ur.ROLE_SEQ = nr.ROLE_SEQ
+    LEFT OUTER JOIN NURI_USER_COMPANY uc ON ui.USER_SEQ = uc.USER_SEQ
+    LEFT OUTER JOIN NURI_COMPANY_INFO ci ON uc.COMP_SEQ = ci.COMP_SEQ
+    <include refid="search_where_list"/>
+    <include refid="commonMapper.order_by_list"/>
+    <include refid="commonMapper.page_limit"/>
+  </select>
+
+  <select id="countUserGridTotal" parameterType="hashMap" resultType="java.lang.Integer">
+    /* userMapper.countUserGridTotal */
+    SELECT
+        count(ui.USER_SEQ) TOTAL_CNT
+    FROM NURI_USER_INFO ui
+    LEFT OUTER JOIN NURI_USER_ROLE ur ON ui.USER_SEQ = ur.USER_SEQ
+    LEFT OUTER JOIN NURI_USER_COMPANY uc ON ui.USER_SEQ = uc.USER_SEQ
+    LEFT OUTER JOIN NURI_ROLE nr ON ur.ROLE_SEQ = nr.ROLE_SEQ
+    LEFT OUTER JOIN NURI_COMPANY_INFO ci ON uc.COMP_SEQ = ci.COMP_SEQ
+    <include refid="search_where_list"/>
+  </select>
+</mapper>

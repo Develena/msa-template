@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ UserMapper.xml
+  ~
+  ~
+  ~ 21. 3. 15. 오전 11:21
+  ~
+  ~
+  ~ Copyright (c) 2021 NURIFLEX, Inc.
+  ~ All rights reserved.
+  ~
+  ~
+  ~ This software is the confidential and proprietary information of NURIFLEX, Inc. ("Confidential Information").
+  ~ You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement you entered into with NURIFLEX, Inc.
+  ~
+  ~
+  ~ For more information on this product, please see
+  ~ http://www.nuritelecom.co.kr
+  ~
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="userCompanyMapper">
+
+  <sql id="base_where_list">
+    <where>
+      <if test="userSeq != null">
+        AND USER_SEQ = #{userSeq}
+      </if>
+      <if test="compSeq != null">
+        AND COMP_SEQ = #{compSeq}
+      </if>
+      <if test="creatorId != null">
+        AND CREATOR_ID = #{creatorId}
+      </if>
+    </where>
+  </sql>
+
+  <insert id="createUserCompany" parameterType="UserCompanyParam">
+    /* userRoleMapper.createUserRole */
+    INSERT INTO NURI_USER_COMPANY ( user_seq
+                                  , comp_seq
+                                  , creator_id
+                                  , created_dt
+    ) value (
+        #{userSeq}
+      , #{compSeq}
+      , #{creatorId}
+      , #{createdDt}
+    )
+  </insert>
+
+  <select id="selectUserCompanyByUserSeq" parameterType="java.lang.Integer" resultType="UserCompany">
+    SELECT user_seq
+         , comp_seq
+         , creator_id
+         , created_dt
+    FROM NURI_USER_COMPANY
+    WHERE user_seq = #{userSeq};
+  </select>
+
+  <select id="selectUserCompanyByParam" parameterType="hashMap" resultType="UserCompany">
+    SELECT user_seq
+         , comp_seq
+         , creator_id
+         , created_dt
+    FROM NURI_USER_COMPANY
+    <include refid="base_where_list"/>
+  </select>
+
+</mapper>

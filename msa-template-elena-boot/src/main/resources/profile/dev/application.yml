@@ -1,0 +1,115 @@
+#dev server info
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    whitelabel:
+      enabled: true
+logging:
+  level:
+    root: INFO
+
+#package
+package: com.msa.template.elena
+
+# jwt
+nuri:
+  jwt:
+    auth:
+      name: x-auth-token
+    access:
+      name: x-access-token
+    alg: HS256
+    sign:
+      secret: gnd-onm
+  security:
+    auth: /api/gnd-onm-user/v1.0/admin/**:R001,/api/gnd-onm-user/v1.0/manager/**:R002
+
+#mybatis config
+mybatis:
+  config-location: classpath:mybatis/mapperConfig/MapperConfig.xml
+  sql-location: classpath:/mybatis/mariadb/*.xml
+  properties: '{"encrypt-key": "onm-encrypt-key"}'
+
+
+#dev jdbc
+spring:
+  profiles:
+    active: @activatedProperties@
+  datasource:
+    hikari:
+      #dirver-class-name: org.mariadb.jdbc.Driver
+      #jdbc-url: jdbc:mariadb://172.16.10.92:3306/nuri
+      dirver-class-name: net.sf.log4jdbc.DriverSpy
+      jdbc-url: jdbc:log4jdbc:mariadb://193.123.224.65:30207/user?characterEncoding=UTF-8&passwordCharacterEncoding=utf8
+      username: ${jdbcuser:root}
+      password: ${jdbcpass:aimiramm12!@}
+      idleTimeout: 10000
+      connection-timeout: 10000
+      validation-timeout: 10000
+      maxLifetime: 580000
+      maximumPoolSize: 30
+      minimumIdle: 10
+  messages:
+    basename: messages/response-messages
+    encoding: UTF-8
+
+
+#  cache:
+#    jcache:
+#      config: classpath:ehcache.xml
+
+# Swagger
+swagger:
+  path: /api/gnd-onm-user/v${swagger.api.ver}/**
+  api:
+    title: GreenNewDeal ONM User Service
+    desc: <br>[See ErrorCode Specification]
+    ver: 1.0
+  contact:
+    name: Hyunhee
+    url: ''
+    email: hyunhee@nuriflex.com
+  license:
+    name: Copyright (c) 2021 NURIFLEX, Inc.
+    url: http://www.nuriflex.co.kr
+  doc:
+    desc: GreenNudeal ONM User Service API Documentation
+    path: /index.html
+
+# springdoc
+springdoc:
+  version: 1.0 # 문서 버전 = 배포버전
+  api-docs:
+    path: /api-docs
+  #    groups:
+  #      enabled: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  swagger-ui:
+    path: /api-ui.html # swagger-ui custom path
+    tags-sorter: alpha
+    operations-sorter: method
+    groups-order: DESC
+    display-request-duration: true
+    disable-swagger-default-url: true
+    display-query-params-without-oauth2: true
+    deep-linking: true
+  #    doc-expansion: true
+  paths-to-match:
+    - ${swagger.path} # path selector
+  writer-with-default-pretty-printer: true
+
+rsa:
+  publicKeyString: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLfWTefQbvzZBauNdKhpOnXdYTYxzvG1Mq3nUHtJ6XekIzOxxqbDHVHQTqLZB3jdbpIFU+dQqMPGTHyG5/Sdn+XNMXNUW9rka4l4nqZ99Pxiev+pYvtPEIwj/ioZG5NsVrMJzc0VDzD0JrE6BN1wJeLJJX2oXn3og2hlBgfu19KQIDAQAB
+
+msa:
+  url:
+    auth: http://193.123.224.65:31201/svc/gnd-onm-auth/v1.0
+    login: http://193.123.224.65:31202/svc/gnd-onm-login/v1.0
+    ums: http://193.123.224.65:31203/svc/gnd-onm-ums/v1.0
+
+project:
+  code: US
+  name: 사용자서비스

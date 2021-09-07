@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- ******************  -->
+  <!-- parent module setting -->
+  <!-- ******************  -->
+  <parent>
+    <groupId>com.elena.project.user</groupId>
+    <artifactId>msa-template-user</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <!-- ******************  -->
+  <!-- oneself module setting -->
+  <!-- ******************  -->
+  <artifactId>${project.main.name}-boot</artifactId>
+  <groupId>${project.main.package}</groupId>
+  <version>${project.boot.version}</version>
+  <packaging>jar</packaging>
+
+  <dependencies>
+    <!-- ******************  -->
+    <!-- project module      -->
+    <!-- ******************  -->
+    <dependency>
+      <artifactId>${project.main.name}-service</artifactId>
+      <groupId>${project.main.package}</groupId>
+      <version>${project.service.version}</version>
+    </dependency>
+
+    <!-- test -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- test -->
+  </dependencies>
+
+  <!-- ******************  -->
+  <!-- build option        -->
+  <!-- ******************  -->
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources/</directory>
+        <filtering>true</filtering>
+        <excludes>
+          <exclude>profile/**/**</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>src/main/resources/profile/${env}</directory>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/webapp</directory>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <delimiters>
+            <delimiter>@</delimiter>
+          </delimiters>
+          <useDefaultDelimiters>false</useDefaultDelimiters>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <!--<classifier>spring-boot</classifier>-->
+          <mainClass>com.msa.template.elena.MsaTemplateApp</mainClass>
+          <!-- springdoc-openapi-->
+          <jvmArguments>-Dspring.application.admin.enabled=true</jvmArguments>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+          <!-- springdoc-openapi-->
+          <execution>
+            <id>pre-integration-test</id>
+            <goals>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>post-integration-test</id>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- springdoc-openapi-->
+      <plugin>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-maven-plugin</artifactId>
+        <version>1.1</version>
+        <configuration>
+          <apiDocsUrl>${apiDoc.url}</apiDocsUrl>
+          <outputFileName>swagger-doc.yaml</outputFileName>
+          <outputDir>src/main/resources/generated-sources</outputDir>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- openapi generator : yaml to html-->
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${openapi.generator.version}</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <inputSpec>${project.basedir}/src/main/resources/generated-sources/swagger-doc.yaml
+          </inputSpec>
+          <generatorName>html2</generatorName>
+          <output>src/main/resources/static</output>
+          <!--<output>target/classes/static</output>-->
+          <configOptions>
+            <infoUrl>http://www.nuriflex.co.kr
+            </infoUrl>
+            <licenseInfo>Copyright (c) 2021 NURIFLEX, Inc.</licenseInfo>
+            <licenseUrl>http://www.nuriflex.co.kr</licenseUrl>
+          </configOptions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>local</id>
+      <properties>
+        <env>local</env>
+        <maven.test.skip>true</maven.test.skip>
+        <apiDoc.url>http://localhost:8080/api-docs</apiDoc.url>
+        <activatedProperties>local</activatedProperties>
+      </properties>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+    <profile>
+      <id>dev</id>
+      <properties>
+        <env>dev</env>
+        <maven.test.skip>true</maven.test.skip>
+        <apiDoc.url>http://193.123.228.68:31204/api-docs</apiDoc.url>
+        <activatedProperties>dev</activatedProperties>
+      </properties>
+    </profile>
+    <profile>
+      <id>op</id>
+      <properties>
+        <env>op</env>
+        <maven.test.skip>true</maven.test.skip>
+        <apiDoc.url>http://193.123.228.68:31204/api-docs</apiDoc.url>
+        <activatedProperties>op</activatedProperties>
+      </properties>
+    </profile>
+  </profiles>
+</project>

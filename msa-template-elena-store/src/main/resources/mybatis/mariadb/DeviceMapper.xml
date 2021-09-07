@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ UserMapper.xml
+  ~
+  ~
+  ~ 21. 3. 15. 오전 11:21
+  ~
+  ~
+  ~ Copyright (c) 2021 NURIFLEX, Inc.
+  ~ All rights reserved.
+  ~
+  ~
+  ~ This software is the confidential and proprietary information of NURIFLEX, Inc. ("Confidential Information").
+  ~ You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement you entered into with NURIFLEX, Inc.
+  ~
+  ~
+  ~ For more information on this product, please see
+  ~ http://www.nuritelecom.co.kr
+  ~
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="deviceMapper">
+
+  <sql id="app_base_where">
+    <where>
+      <if test="appId != null and appId !=''">
+        AND APP_ID = #{appId}
+      </if>
+      <if test="appName != null and appName !=''">
+        AND APP_NM = #{appName}
+      </if>
+      <if test="os != null and os !=''">
+        AND OS = #{os}
+      </if>
+      <if test="appVersion != null and appVersion !=''">
+        AND APP_VER = #{appVersion}
+      </if>
+      <if test="inApproval != null">
+        AND IN_APPROVAL = #{inApproval}
+      </if>
+    </where>
+
+  </sql>
+
+  <insert id="insertDeviceInfo" parameterType="RegisterDeviceParam">
+    /* deviceMapper.insertDeviceInfo */
+    INSERT INTO NURI_USER_DEVICE
+    (
+    UDID, UDID_TYPE ,PUSH_TOKEN
+    , APP_ID, APP_VER, OS_TYPE, OS_VER
+    , CREATOR_ID, CREATED_DT  )
+    VALUES
+    (
+    #{udid}, #{udidType}, #{pushToken}
+    , #{appId}, #{appVer}, #{osType}, #{osVer}
+    , #{creatorId}, #{createdDt}
+    )
+  </insert>
+
+  <update id="updateDevicePushToken" parameterType="ModifyDevicePushTokenParam">
+    /* deviceMapper.updateDevicePushToken */
+    UPDATE NURI_USER_DEVICE
+    SET PUSH_TOKEN = #{pushToken},
+    UPDATER_ID = #{updaterId},
+    UPDATED_DT = #{updatedDt}
+    WHERE UDID = #{udid}
+  </update>
+
+  <select id="selectDeviceInfo" parameterType="String" resultType="DeviceResult">
+    /* deviceMapper.selectDeviceInfo */
+    SELECT
+    DEVICE_SEQ, USER_SEQ, UDID, UDID_TYPE
+    , PUSH_TOKEN, APP_ID, APP_VER, OS_TYPE
+    , OS_VER, CREATOR_ID, CREATED_DT
+    , UPDATER_ID, UPDATED_DT
+    FROM NURI_USER_DEVICE
+    WHERE UDID = #{udid}
+  </select>
+
+  <update id="updateDeviceInfo" parameterType="ModifyDeviceParam">
+    /* deviceMapper.updateDeviceInfo */
+    UPDATE NURI_USER_DEVICE
+    SET
+    USER_SEQ = #{userSeq}
+    <if test="pushToken != null and pushToken != '' ">
+      , PUSH_TOKEN = #{pushToken}
+    </if>
+    <if test="appId != null and appId != '' ">
+      , APP_ID = #{appId}
+    </if>
+    <if test="appVer != null and appVer != '' ">
+      , APP_VER = #{appVer}
+    </if>
+    <if test="osType != null and osType != '' ">
+      , OS_TYPE = #{osType}
+    </if>
+    <if test="osVer != null and osVer != '' ">
+      , OS_VER = #{osVer}
+    </if>
+    <if test="updaterId != null and updaterId != '' ">
+      , UPDATER_ID = #{updaterId}
+    </if>
+    , UPDATED_DT = #{updatedDt}
+    WHERE UDID = #{udid}
+  </update>
+
+  <update id="modifyUserDetailMobileUseYn" parameterType="int">
+    /* deviceMapper.modifyUserDetailMobileUseYn */
+    UPDATE NURI_USER_DETAIL
+    SET MOBILE_USE_YN = 1
+    WHERE USER_SEQ = #{userSeq} AND MOBILE_USE_YN = 0
+  </update>
+
+
+  <select id="selectAppInfo" resultType="AppInfo" parameterType="hashMap">
+    /* deviceMapper.selectAppInfo */
+    SELECT
+        APP_ID
+        , APP_NM
+        , OS
+        , APP_VER
+        , MIN_VER
+        , IN_APPROVAL
+        , CREATOR_ID
+        , CREATED_DT
+        , UPDATER_ID
+        , UPDATED_DT
+    from NURI_APP_INFO
+    <include refid="app_base_where"/>
+
+  </select>
+
+  <update id="updateAppInfo" parameterType="hashMap">
+    /* deviceMapper.updateAppInfo */
+    update NURI_APP_INFO
+    set
+    UPDATER_ID = #{updaterId}
+    <if test="appVersion != null and appVersion != '' ">
+      , APP_VER = #{appVersion}
+    </if>
+    <if test="os != null and os != '' ">
+      , OS = #{os}
+    </if>
+    <if test="inApproval != null">
+      , IN_APPROVAL = #{inApproval}
+    </if>
+    , UPDATED_DT = #{updatedDt}
+    where APP_ID = #{appId};
+
+
+  </update>
+</mapper>

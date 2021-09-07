@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: PROJECT_IMAGENM
+  namespace: APPLY_NAMESPACE
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: PROJECT_IMAGENM
+  template:
+    metadata:
+      name: PROJECT_IMAGENM
+      labels:
+        app: PROJECT_IMAGENM
+    spec:
+      containers:
+        - name: PROJECT_IMAGENM
+          image: PROJECT_IMAGE_ADDR/PROJECT_IMAGENM:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: PROJECT_PORT
+          envFrom:
+            - configMapRef:
+                name: PROJECT_CONFIGMAP
+      imagePullSecrets:
+        - name: nuri-registry
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: PROJECT_IMAGENM
+  namespace: APPLY_NAMESPACE
+spec:
+  ports:
+    - name: PROJECT_IMAGENM
+      port: PROJECT_PORT
+      targetPort: PROJECT_PORT
+      nodePort: PR_NODE_PORT
+  selector:
+    app: PROJECT_IMAGENM
+  type: NodePort

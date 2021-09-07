@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ UserMapper.xml
+  ~
+  ~
+  ~ 21. 3. 15. 오전 11:21
+  ~
+  ~
+  ~ Copyright (c) 2021 NURIFLEX, Inc.
+  ~ All rights reserved.
+  ~
+  ~
+  ~ This software is the confidential and proprietary information of NURIFLEX, Inc. ("Confidential Information").
+  ~ You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement you entered into with NURIFLEX, Inc.
+  ~
+  ~
+  ~ For more information on this product, please see
+  ~ http://www.nuritelecom.co.kr
+  ~
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="userDetailMapper">
+
+  <sql id="base_where_list">
+    <where>
+      <if test="userSeq != null">
+        AND USER_SEQ = #{userSeq}
+      </if>
+      <if test="creatorId != null">
+        AND CREATOR_ID = #{creatorId}
+      </if>
+      <if test="searchfield != null and searchquery != null ">
+        AND ${searchfield} like concat(#{searchquery},'%')
+      </if>
+    </where>
+  </sql>
+
+  <insert id="createUserDetail" parameterType="UserDetailParam">
+    INSERT INTO `NURI_USER_DETAIL`(
+        user_seq
+        , terms_agree
+        , terms_agree_dt
+        , mobile_use_yn
+        , birthday
+        , birthday_type
+        , approval_status
+        , approval_dt
+        , approval_id
+        , member_lv
+        , created_dt
+    ) value(
+        #{userSeq}
+        , #{termsAgree}
+        , #{termsAgreeDt}
+        , #{mobileUseYn}
+        , #{birthday}
+        , #{birthdayType}
+        , #{approvalStatus}
+        , #{approvalDt}
+        , #{approvalId}
+        , #{memberLv}
+        , #{createdDt}
+    )
+
+  </insert>
+
+
+  <update id="updateUserEmailVerified" parameterType="hashMap">
+    /* userDetailMapper.updateUserEmailVerified */
+    update `NURI_USER_DETAIL`
+    <set>
+      <if test="emailVerifiedDt != null">email_verified_dt=#{emailVerifiedDt}</if>
+    </set>
+    where user_seq=#{userSeq}
+
+  </update>
+
+  <update id="updateUserSmsVerified" parameterType="hashMap">
+    /* userDetailMapper.updateUserSmsVerified */
+    update `NURI_USER_DETAIL`
+    <set>
+      <if test="smsVerifiedDt != null">sms_verified_dt=#{smsVerifiedDt}</if>
+    </set>
+    where user_seq=#{userSeq}
+
+  </update>
+
+
+</mapper>

@@ -1,0 +1,134 @@
+variables:
+  # repository name
+  PROJECT: "${PROJECT_IMAGENM}"
+  # gitlab login 계정
+  REG_LOGIN_USER: "${CI_REGISTRY_USER}"
+  REG_LOGIN_PWD: "${CI_REGISTRY_PASSWORD}"
+  # CI_REGISTRY=registry.gitlab.com
+  REG_REGISTRY_BASE: "${CI_REGISTRY}/${PROJECT_IMAGENM}"
+  REG_REGISTRY_BASE_ADDR: "${CI_REGISTRY}"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+  # PROJECT VARIABLES
+  PR_PROJECT_BOOT_NAME: "${PROJECT_BOOT_NAME}"
+  PR_PROJECT_TARGET_NAME: "${PROJECT_TARGET_NAME}"
+  PR_PROJECT_PORT: "${PROJECT_PORT}"
+
+  DEPLOY_SERVER_ADDRESS: "${DEPLOY_SERVER_ADDRESS}"
+  CERTIFICATE_AUTHORITY_DATA: "${CERTIFICATE_AUTHORITY_DATA}"
+  USER_KEY: "${USER_KEY}"
+  USER_TOKEN: "${USER_TOKEN}"
+
+  PR_PROJECT_CONFIGMAP: "${PROJECT_CONFIGMAP}"
+
+  DEV_NODE_PORT: "${DEV_NODE_PORT}"
+  QC_NODE_PORT: "${QC_NODE_PORT}"
+  TEST_NODE_PORT: "${TEST_NODE_PORT}"
+
+  DEV_NAMESPACE: "${DEV_NAMESPACE}"
+  QC_NAMESPACE: "${QC_NAMESPACE}"
+  TEST_NAMESPACE: "${TEST_NAMESPACE}"
+
+stages:
+  - build_jar
+  - docker_build
+  - deploy
+
+jar_build:
+  image: maven:3.6.3-amazoncorretto-11
+  cache:
+    paths:
+      - .m2/repository
+  stage: build_jar
+  before_script:
+    - pwd
+    - ls -alhF .
+  script:
+    - mvn clean
+    - mvn -s .m2/settings.xml -f pom.xml --activate-profiles dev verify
+    - mvn -s .m2/settings.xml -f pom.xml --activate-profiles dev install
+  after_script:
+    - pwd
+    - ls -alhF .
+    - du . --max-depth=1
+    - du /root/.m2/repository/ --max-depth=1
+  artifacts:
+    paths:
+      - /builds/${CI_PROJECT_PATH}/${PR_PROJECT_BOOT_NAME}/target/*.jar
+  only:
+    - master
+
+build_post_server:
+  stage: docker_build
+  script:
+    - echo "- docker login -u '${REG_LOGIN_USER}' -p '${REG_LOGIN_PWD}' '${CI_REGISTRY}'"
+    - docker login -u "${REG_LOGIN_USER}" -p "${REG_LOGIN_PWD}" "${CI_REGISTRY}"
+    - docker build -t "${REG_REGISTRY_BASE}:${CI_PIPELINE_ID}" .
+      --build-arg PR_PROJECT_BOOT_NAME=$PR_PROJECT_BOOT_NAME
+      --build-arg PR_PROJECT_TARGET_NAME=$PR_PROJECT_TARGET_NAME
+      --build-arg PR_PROJECT_PORT=$PR_PROJECT_PORT
+    - docker tag "${REG_REGISTRY_BASE}:${CI_PIPELINE_ID}" "${REG_REGISTRY_BASE}:latest"
+    - docker push "${REG_REGISTRY_BASE}:${CI_PIPELINE_ID}"
+    - docker push "${REG_REGISTRY_BASE}:latest"
+  only:
+    - master
+
+dev_deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl
+  # when: manual
+  before_script:
+    - sed -e "s/PROJECT_IMAGE_ADDR/$REG_REGISTRY_BASE_ADDR/g" deployment-template.yml > deploy-temp4.yml
+    - sed -e "s/APPLY_NAMESPACE/$DEV_NAMESPACE/g" deploy-temp4.yml > deploy-temp3.yml
+    - sed -e "s/PROJECT_IMAGENM/$PROJECT/g" deploy-temp3.yml > deploy-temp2.yml
+    - sed -e "s/PROJECT_PORT/$PR_PROJECT_PORT/g" deploy-temp2.yml > deploy-temp1.yml
+    - sed -e "s/PROJECT_CONFIGMAP/$PR_PROJECT_CONFIGMAP/g" deploy-temp1.yml > deploy-temp0.yml
+    - sed -e "s/PR_NODE_PORT/$DEV_NODE_PORT/g" deploy-temp0.yml > deploy-fanal.yml
+
+    - sed -e "s/APPLY_SERVER/$DEPLOY_SERVER_ADDRESS/g" k8s-config > k3s-config-temp4
+    - sed -e "s/APPLY_CERTIFICATE_AUTHORITY_DATA/$CERTIFICATE_AUTHORITY_DATA/g" k3s-config-temp4 > k3s-config-temp3
+    - sed -e "s/APPLY_USER_TOKEN/$USER_TOKEN/g" k3s-config-temp3 > k3s-config-temp2
+    - sed -e "s/APPLY_USER_KEY/$USER_KEY/g" k3s-config-temp2 > k3s-config
+  script:
+    - kubectl apply -f deploy-fanal.yml --insecure-skip-tls-verify --kubeconfig k3s-config
+    - kubectl rollout restart deployment --namespace=$DEV_NAMESPACE $PROJECT --insecure-skip-tls-verify --kubeconfig k3s-config
+
+test_deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl
+  when: manual
+  before_script:
+    - sed -e "s/PROJECT_IMAGE_ADDR/$REG_REGISTRY_BASE_ADDR/g" deployment-template.yml > deploy-temp4.yml
+    - sed -e "s/APPLY_NAMESPACE/$TEST_NAMESPACE/g" deploy-temp4.yml > deploy-temp3.yml
+    - sed -e "s/PROJECT_IMAGENM/$PROJECT/g" deploy-temp3.yml > deploy-temp2.yml
+    - sed -e "s/PROJECT_PORT/$PR_PROJECT_PORT/g" deploy-temp2.yml > deploy-temp1.yml
+    - sed -e "s/PROJECT_CONFIGMAP/$PR_PROJECT_CONFIGMAP/g" deploy-temp1.yml > deploy-temp0.yml
+    - sed -e "s/PR_NODE_PORT/$TEST_NODE_PORT/g" deploy-temp0.yml > deploy-fanal.yml
+
+    - sed -e "s/APPLY_SERVER/$DEPLOY_SERVER_ADDRESS/g" k8s-config > rke-config-temp4
+    - sed -e "s/APPLY_CERTIFICATE_AUTHORITY_DATA/$CERTIFICATE_AUTHORITY_DATA/g" rke-config-temp4 > rke-config-temp3
+    - sed -e "s/APPLY_USER_TOKEN/$USER_TOKEN/g" rke-config-temp3 > rke-config-temp2
+    - sed -e "s/APPLY_USER_KEY/$USER_KEY/g" rke-config-temp2 > rke-config
+  script:
+    - kubectl apply -f deploy-fanal.yml --insecure-skip-tls-verify --kubeconfig rke-config
+    - kubectl rollout restart deployment --namespace=$TEST_NAMESPACE $PROJECT --insecure-skip-tls-verify --kubeconfig rke-config
+
+qc_deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl
+  when: manual
+  before_script:
+    - sed -e "s/PROJECT_IMAGE_ADDR/$REG_REGISTRY_BASE_ADDR/g" deployment-template.yml > deploy-temp4.yml
+    - sed -e "s/APPLY_NAMESPACE/$QC_NAMESPACE/g" deploy-temp4.yml > deploy-temp3.yml
+    - sed -e "s/PROJECT_IMAGENM/$PROJECT/g" deploy-temp3.yml > deploy-temp2.yml
+    - sed -e "s/PROJECT_PORT/$PR_PROJECT_PORT/g" deploy-temp2.yml > deploy-temp1.yml
+    - sed -e "s/PROJECT_CONFIGMAP/$PR_PROJECT_CONFIGMAP/g" deploy-temp1.yml > deploy-temp0.yml
+    - sed -e "s/PR_NODE_PORT/$QC_NODE_PORT/g" deploy-temp0.yml > deploy-fanal.yml
+
+    - sed -e "s/APPLY_SERVER/$DEPLOY_SERVER_ADDRESS/g" k8s-config > rke-config-temp4
+    - sed -e "s/APPLY_CERTIFICATE_AUTHORITY_DATA/$CERTIFICATE_AUTHORITY_DATA/g" rke-config-temp4 > rke-config-temp3
+    - sed -e "s/APPLY_USER_TOKEN/$USER_TOKEN/g" rke-config-temp3 > rke-config-temp2
+    - sed -e "s/APPLY_USER_KEY/$USER_KEY/g" rke-config-temp2 > rke-config
+  script:
+    - kubectl apply -f deploy-fanal.yml --insecure-skip-tls-verify --kubeconfig rke-config
+    - kubectl rollout restart deployment --namespace=$QC_NAMESPACE $PROJECT --insecure-skip-tls-verify --kubeconfig rke-config

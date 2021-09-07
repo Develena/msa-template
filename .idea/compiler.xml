@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="msa-template-elena-service" />
+        <module name="msa-template-elena-store" />
+        <module name="msa-template-elena-boot" />
+        <module name="msa-template-elena-domain" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="msa-template-elena" target="1.8" />
+      <module name="msa-template-elena-boot" target="1.8" />
+      <module name="msa-template-elena-domain" target="1.8" />
+      <module name="msa-template-elena-service" target="1.8" />
+      <module name="msa-template-elena-store" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="msa-template-elena-boot" options="-parameters" />
+      <module name="msa-template-elena-domain" options="-parameters" />
+      <module name="msa-template-elena-service" options="-parameters" />
+      <module name="msa-template-elena-store" options="-parameters" />
+    </option>
+  </component>
+</project>

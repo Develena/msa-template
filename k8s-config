@@ -1,0 +1,19 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: APPLY_CERTIFICATE_AUTHORITY_DATA
+    server: APPLY_SERVER
+  name: default
+contexts:
+- context:
+    cluster: default
+    user: default
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: default
+  user:
+    client-certificate-data: APPLY_USER_TOKEN
+    client-key-data: APPLY_USER_KEY
